@@ -84,18 +84,30 @@ router.get('/getAllValidInv', async (req, res) => {
         pool = await poolPromise;
         const request = pool.request();
 
-        let query = `
-            SELECT ITMREF_0, LOT_0, LOC_0, STOFCY_0,STOCOU_0 FROM TCE.STOCK
-            WHERE STOFCY_0 = 'SIG' AND ITMREF_0 LIKE '${itmref}%' GROUP BY ITMREF_0, LOT_0, LOC_0, STOFCY_0,STOCOU_0
+        // First query (for stock data)
+        const query1 = `
+            SELECT ITMREF_0, LOT_0, LOC_0, STOFCY_0, STOCOU_0 
+            FROM TCE.STOCK
+            WHERE STOFCY_0 = 'SIG' AND ITMREF_0 LIKE '${itmref}%' 
+            GROUP BY ITMREF_0, LOT_0, LOC_0, STOFCY_0, STOCOU_0
+        `;
+        
+        // Second query (for item master data)
+        const query2 = `
+            SELECT TSICOD_0, TSICOD_1, ITMDES1_0 
+            FROM TCE.ITMMASTER
+            WHERE ITMREF_0 = '${itmref}'
         `;
 
-        // Appliquer un filtre si `itmref` est fourni
-      
-     
+        // Execute both queries
+        const result1 = await request.query(query1);
+        const result2 = await request.query(query2);
 
-        const result = await request.query(query);
-
-        res.status(200).json(result.recordset);
+        // Combine the results in a single response
+        res.status(200).json({
+            stockData: result1.recordset,
+            itemMasterData: result2.recordset
+        });
     } catch (error) {
         if (pool) {
             try {
@@ -108,6 +120,7 @@ router.get('/getAllValidInv', async (req, res) => {
         return res.status(400).json({ message: 'Something went wrong', error: error.message });
     }
 });
+
 router.get('/getInv', async (req, res) => {
     let pool;
     try {
@@ -142,4 +155,3 @@ router.get('/getInv', async (req, res) => {
 
 
 module.exports = router;
-
