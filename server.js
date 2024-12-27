@@ -12,8 +12,8 @@ app.use(express.json());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(cors({
-    origin:["https://topinv2.vercel.app"],
-    methods:["POST","GET","PUT","DELETE"],
+    origin:["http://localhost:3000"],
+    methods:["POST","GET","PUT"],
     credentials:true
     }));
 
@@ -24,6 +24,7 @@ const validinvRoute = require('./routes/validInvRoute');
 const getinvRoute = require('./routes/validInvRoute');
 const validInvInsertRoute = require('./routes/validInvRoute');
 const validInvCodetRoute = require('./routes/validInvRoute');
+const getDataValInv = require('./routes/getdatavalinv');
 
 
 app.use('/api/validinv/', validInvCodetRoute);
@@ -32,6 +33,7 @@ app.use('/api/validinv/', validinvRoute);
 app.use('/api/products/', productsRoute);
 app.use('/api/users/', userRoute);
 app.use('/api/inventaire/', inventaireRoute);
+app.use('/api/getvaliddata/', getDataValInv);
 
 // Endpoint to send email
 app.post('/send-email', (req, res) => {
