@@ -29,14 +29,14 @@ router.post('/register', async (req, res) => {
 });
 */
 router.post('/login', async (req, res) => {
-    const { email, password } = req.body;
+    const { username, password } = req.body;
     try {
         const pool = await poolPromise; // Get the pool connection
         const request = pool.request(); // Create a new request from the pool
 
         // Use parameterized queries to prevent SQL injection
-        const query = `SELECT * FROM [topclass_ges].[topclass].[USERS] WHERE EMAILUSR = @Email AND MotDePasse = @Password`;
-        request.input('Email', sql.NVarChar, email);
+        const query = `SELECT * FROM [topclass_ges].[topclass].[USERS] WHERE USR = @USR AND MotDePasse = @Password`;
+        request.input('USR', sql.NVarChar, username);
         request.input('Password', sql.NVarChar, password);
 
         const result = await request.query(query);
