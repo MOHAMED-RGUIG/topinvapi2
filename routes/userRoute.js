@@ -35,7 +35,7 @@ router.post('/login', async (req, res) => {
         const request = pool.request(); // Create a new request from the pool
 
         // Use parameterized queries to prevent SQL injection
-        const query = `SELECT * FROM [topclass_ges].[topclass].[USERS] WHERE USR = @USR AND MotDePasse = @Password`;
+        const query = `SELECT * FROM [topclass_sage].[TCE].[INVUSER] WHERE USR = @USR AND MotDePasse = @Password`;
         request.input('USR', sql.NVarChar, username);
         request.input('Password', sql.NVarChar, password);
 
