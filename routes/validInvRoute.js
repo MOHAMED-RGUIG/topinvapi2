@@ -24,13 +24,13 @@ router.post('/validInvInsert', async (req, res) => {
             request.input('ITMREF_0', sql.NVarChar(), ITMREF_0);
             request.input('LOT_0', sql.NVarChar(), row.LOT_0);
             request.input('STOFCY_0', sql.NVarChar(), row.STOFCY_0);
-            request.input('QTYINV_0', sql.Int, row.STOCOU_0);
+            request.input('QTYINV_0', sql.Int, row.Qt);
             request.input('userID', sql.Int, currentUser.ID); // Make sure userID is passed as a parameter
             console.log(row.Qt);
             // Use parameterized query to insert the data
             await request.query(
                 `INSERT INTO TCE.YINMEN (REFINV_0, ITMREF_0, LOT_0, STOFCY_0, QTYINV_0, [USER]) 
-                 VALUES (@REFINV_0, @ITMREF_0, @LOT_0, @STOFCY_0, @STOCOU_0, @userID)`
+                 VALUES (@REFINV_0, @ITMREF_0, @LOT_0, @STOFCY_0, @QTYINV_0, @userID)`
             );
         }
 
@@ -43,6 +43,8 @@ router.post('/validInvInsert', async (req, res) => {
         return res.status(500).json({ message: 'Something went wrong', error: error.message });
     }
 });
+
+
 
 
 router.get('/getAllValidInvByCode', async (req, res) => {
