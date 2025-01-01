@@ -96,7 +96,7 @@ router.get('/getAllValidInv', async (req, res) => {
         
         // Second query (for item master data)
         const query2 = `
-            SELECT TSICOD_0, TSICOD_1, ITMDES1_0 
+            SELECT TSICOD_0, TSICOD_1, ITMDES1_0 ,EANCOD_0
             FROM TCE.ITMMASTER
             WHERE ITMREF_0 = '${itmref}'
         `;
