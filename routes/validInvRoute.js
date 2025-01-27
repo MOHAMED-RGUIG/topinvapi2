@@ -9,35 +9,53 @@ router.post('/validInvInsert', async (req, res) => {
         const { currentUser, REFINV_0, ITMREF_0, rows } = req.body;
 
         // Vérifiez que les données nécessaires sont présentes
-        if (!REFINV_0 || !ITMREF_0 || !rows || rows.length === 0 || !currentUser.ID) {
-            return res.status(400).json({ message: 'Aucune ligne à insérer.' });
+        if (!REFINV_0 || !ITMREF_0 || !rows || !Array.isArray(rows)) {
+            return res.status(400).json({ message: 'Invalid input data' });
         }
 
         // Obtenez une connexion au pool
         pool = await poolPromise;
-        
+
         for (const row of rows) {
-            const request = pool.request(); // Create a new request instance for each iteration
-            
-            // Bind parameters for the current row
+            const request = pool.request(); // Nouvelle requête pour chaque itération
+
+            // Liaison des paramètres pour la ligne actuelle
             request.input('REFINV_0', sql.NVarChar(), REFINV_0);
             request.input('ITMREF_0', sql.NVarChar(), ITMREF_0);
             request.input('LOT_0', sql.NVarChar(), row.LOT_0);
             request.input('STOFCY_0', sql.NVarChar(), row.STOFCY_0);
             request.input('QTYINV_0', sql.Int, row.Qt);
-            request.input('userID', sql.Int, currentUser.ID); // Make sure userID is passed as a parameter
-            console.log(row.Qt);
-            // Use parameterized query to insert the data
-            await request.query(
-                `INSERT INTO TCE.YINMEN (REFINV_0, ITMREF_0, LOT_0, STOFCY_0, QTYINV_0, [USER]) 
-                 VALUES (@REFINV_0, @ITMREF_0, @LOT_0, @STOFCY_0, @QTYINV_0, @userID)`
-            );
+            request.input('userID', sql.Int, currentUser.ID);
+
+            // Vérifiez si le LOT_0 existe déjà pour REFINV_0
+            const checkQuery = `
+                SELECT COUNT(*) AS count 
+                FROM TCE.YINMEN 
+                WHERE REFINV_0 = @REFINV_0 AND LOT_0 = @LOT_0 AND STOFCY_0 = @STOFCY_0
+            `;
+            const checkResult = await request.query(checkQuery);
+
+            if (checkResult.recordset[0].count > 0) {
+                // Si le lot existe, mettez à jour la ligne correspondante
+                const updateQuery = `
+                    UPDATE TCE.YINMEN
+                    SET QTYINV_0 = @QTYINV_0, [USER] = @userID
+                    WHERE REFINV_0 = @REFINV_0 AND LOT_0 = @LOT_0 AND STOFCY_0 = @STOFCY_0
+                `;
+                await request.query(updateQuery);
+            } else {
+                // Sinon, insérez une nouvelle ligne
+                const insertQuery = `
+INSERT INTO TCE.YINMEN (REFINV_0, ITMREF_0, LOT_0, STOFCY_0, QTYINV_0, [USER]) 
+                 VALUES (@REFINV_0, @ITMREF_0, @LOT_0, @STOFCY_0, @QTYINV_0, @userID)                `;
+                await request.query(insertQuery);
+            }
         }
 
         // Répondre avec succès
-        res.status(201).send('Order registered successfully');
+        res.status(201).send('Data processed successfully');
     } catch (error) {
-        console.error('Error placing order:', error);
+        console.error('Error processing data:', error);
 
         // Retourner une réponse d'erreur
         return res.status(500).json({ message: 'Something went wrong', error: error.message });
@@ -45,6 +63,35 @@ router.post('/validInvInsert', async (req, res) => {
 });
 
 
+router.get('/getExistingDataForInv', async (req, res) => {
+    const { refInv, itmref } = req.query; // Récupérer `itmref` depuis la requête
+    try {
+        const pool = await poolPromise;
+        const request = pool.request();
+
+        // Ajout des paramètres d'entrée
+        request.input('refInv', sql.NVarChar(), refInv);
+        request.input('itmref', sql.NVarChar(), itmref);
+
+        // Requête SQL
+        const query = `
+            SELECT ITMREF_0, LOT_0, STOFCY_0, QTYINV_0
+            FROM TCE.YINMEN
+            WHERE REFINV_0 = @refInv AND ITMREF_0 = @itmref
+        `;
+        
+        // Exécution de la requête
+        const result = await request.query(query);
+
+        // Retourner les résultats au client
+        res.status(200).json(result.recordset);
+    } catch (error) {
+        console.error("Erreur lors de la récupération des données existantes :", error);
+        res.status(500).send("Erreur serveur");
+    }
+});
+
+  
 
 
 router.get('/getAllValidInvByCode', async (req, res) => {
