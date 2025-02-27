@@ -9,7 +9,7 @@ router.post('/validInvInsert', async (req, res) => {
         const { currentUser, REFINV_0, ITMREF_0, rows } = req.body;
 
         // Vérifiez que les données nécessaires sont présentes
-        if (!REFINV_0 || !ITMREF_0 || !rows || !Array.isArray(rows)) {
+        if (!REFINV_0 || !ITMREF_0 ) {
             return res.status(400).json({ message: 'Invalid input data' });
         }
 
