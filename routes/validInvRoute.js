@@ -75,7 +75,7 @@ router.get('/getExistingDataForInv', async (req, res) => {
 
         // Requête SQL
         const query = `
-            SELECT ITMREF_0, LOT_0, STOFCY_0, QTYINV_0
+            SELECT ITMREF_0, LOT_0, STOFCY_0, QTYINV_0,REFINV_0
             FROM TCE.YINMEN
             WHERE REFINV_0 = @refInv AND ITMREF_0 = @itmref
         `;
