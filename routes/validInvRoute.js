@@ -39,7 +39,7 @@ router.post('/validInvInsert', async (req, res) => {
                 // Si le lot existe, mettez à jour la ligne correspondante
                 const updateQuery = `
                     UPDATE TCE.YINMEN
-                    SET QTYINV_0 = @QTYINV_0, [USER] = @userID
+                    SET QTYINV_0 = QTYINV_0 + @QTYINV_0, [USER] = @userID
                     WHERE REFINV_0 = @REFINV_0 AND LOT_0 = @LOT_0 AND STOFCY_0 = @STOFCY_0
                 `;
                 await request.query(updateQuery);
